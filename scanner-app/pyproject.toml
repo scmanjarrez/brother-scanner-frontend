@@ -1,0 +1,57 @@
+[project]
+name = "scanner-app"
+version = "0.1.0"
+description = "Flask web application for Brother printing and scanning"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "Flask==3.1.2",
+  "gunicorn==23.0.0",
+  "Pillow==11.3.0",
+  "pypdf==5.9.0",
+  "reportlab==4.4.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 79
+cache-dir = "/tmp/.ruff_cache"
+extend-exclude = ["services/service-profiler/scripts"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+fixable = ["ALL"]
+ignore = [ # recommended to disable with ruff formatter
+  "W191",   # tab-indentation
+  "E111",   # indentation-with-invalid-multiple
+  "E114",   # indentation-with-invalid-multiple-comment
+  "E117",   # over-indented
+  "D206",   # docstring-tab-indentation
+  "D300",   # triple-single-quotes
+  "Q000",   # bad-quotes-inline-string
+  "Q001",   # bad-quotes-multiline-string
+  "Q002",   # bad-quotes-docstring
+  "Q003",   # avoidable-escaped-quote
+  "Q004",   # unnecessary-escaped-quote
+  "COM812", # missing-trailing-comma
+  "COM819", # prohibited-trailing-comma
+  "CPY001", # missing-copyright-notice
+  "ISC002", # multi-line-implicit-string-concatenation if used without ISC001 and flake8-implicit-str-concat.allow-multiline = false
+]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 79
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.pyright]
+include = ["src"]
+extraPaths = ["src"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.12"
+typeCheckingMode = "strict"

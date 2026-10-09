@@ -1,0 +1,8 @@
+.env
+data/
+node_modules/
+.venv/
+scanner-app/.venv/
+.ruff_cache/
+__pycache__/
+*.py[cod]

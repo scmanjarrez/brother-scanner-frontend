@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f2eb" />
+    <meta name="description" content="" data-i18n-content="pageDescription" />
+    <title data-i18n="appTitle"></title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+  </head>
+  <body class="min-h-screen">
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand-lockup" href="/" data-i18n-aria-label="brandHomeLabel">
+          <span class="brand-mark">
+            <svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M6 8V3h12v5M6 17H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <path d="M6 14h12v7H6zM18 11h.01" />
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <span class="brand-name" data-i18n="deviceModel"></span>
+          </span>
+        </a>
+        <div class="header-controls">
+          <label class="language-control">
+            <span id="language-label" class="sr-only" data-i18n="language"></span>
+            <select id="language-select" class="select select-bordered language-select" aria-labelledby="language-label">
+              <option value="es" data-i18n="languageNameSpanish"></option>
+              <option value="en" data-i18n="languageNameEnglish"></option>
+            </select>
+          </label>
+          <div id="connection-badge" class="connection-badge" aria-live="polite">
+            <span class="connection-dot"></span>
+            <span data-i18n="connecting"></span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <h1 class="sr-only" data-i18n="printAndScanDocuments"></h1>
+      <nav id="operation-tabs" class="operation-tabs" role="tablist" data-i18n-aria-label="operationTabsLabel">
+        <button id="scan-tab" class="operation-tab tab-active" type="button" role="tab" aria-selected="true" aria-controls="scan-panel" tabindex="0">
+          <span class="operation-tab-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M5 8V4h14v4M5 16H3v-5a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v5h-2" />
+              <path d="M6 14h12v6H6zM17 11h.01" />
+            </svg>
+          </span>
+          <span class="operation-tab-copy">
+            <span class="operation-tab-title" data-i18n="scan"></span>
+          </span>
+        </button>
+        <button id="print-tab" class="operation-tab" type="button" role="tab" aria-selected="false" aria-controls="print-panel" tabindex="-1">
+          <span class="operation-tab-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v4a2 2 0 0 1-2 2h-2" />
+              <path d="M7 14h10v7H7zM18 11h.01" />
+            </svg>
+          </span>
+          <span class="operation-tab-copy">
+            <span class="operation-tab-title" data-i18n="print"></span>
+          </span>
+        </button>
+      </nav>
+
+      <section id="scan-panel" class="card operation-panel" role="tabpanel" aria-labelledby="scan-tab" tabindex="0">
+        <div class="card-body operation-panel-body">
+          <form id="scan-form" class="space-y-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="mode"></span>
+                <select id="workflow" class="select select-bordered w-full bg-white" name="workflow">
+                  <option value="single" data-i18n="singlePage"></option>
+                  <option value="continuous" selected data-i18n="multiplePages"></option>
+                  <option value="card" data-i18n="idCard"></option>
+                </select>
+              </label>
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="format"></span>
+                <select id="output-format" class="select select-bordered w-full bg-white" name="output_format">
+                  <option value="pdf" selected data-i18n="pdfFormat"></option>
+                  <option value="jpeg" data-i18n="jpegFormat"></option>
+                  <option value="png" data-i18n="pngFormat"></option>
+                </select>
+              </label>
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="imageMode"></span>
+                <select class="select select-bordered w-full bg-white" name="scan_mode">
+                  <option value="black_white" data-i18n="blackAndWhite"></option>
+                  <option value="error_diffusion" data-i18n="grayErrorDiffusion"></option>
+                  <option value="gray" data-i18n="grayscale"></option>
+                  <option value="color" selected data-i18n="colorMode"></option>
+                </select>
+              </label>
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="size"></span>
+                <select class="select select-bordered w-full bg-white" name="paper_size">
+                  <option value="A4" selected data-i18n="paperSizeA4"></option>
+                  <option value="A5" data-i18n="paperSizeA5"></option>
+                  <option value="A6" data-i18n="paperSizeA6"></option>
+                  <option value="JIS_B5" data-i18n="jisB5"></option>
+                  <option value="Letter" data-i18n="letter"></option>
+                  <option value="Legal" data-i18n="legal"></option>
+                  <option value="Executive" data-i18n="executive"></option>
+                  <option value="Business_Card" data-i18n="businessCard"></option>
+                  <option value="10x15_cm" data-i18n="photo10x15Cm"></option>
+                  <option value="13x18_cm" data-i18n="photo13x18Cm"></option>
+                  <option value="Postcard" data-i18n="postcard"></option>
+                </select>
+              </label>
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="resolution"></span>
+                <select class="select select-bordered w-full bg-white" name="resolution">
+                  <option value="100" data-i18n="dpi100"></option>
+                  <option value="150" data-i18n="dpi150"></option>
+                  <option value="200" data-i18n="dpi200"></option>
+                  <option value="300" selected data-i18n="dpi300"></option>
+                  <option value="400" data-i18n="dpi400"></option>
+                  <option value="600" data-i18n="dpi600"></option>
+                  <option value="1200" data-i18n="dpi1200"></option>
+                </select>
+              </label>
+            </div>
+
+            <details class="collapse collapse-arrow rounded-xl border border-slate-200 bg-slate-50">
+              <summary class="collapse-title min-h-0 py-3 text-sm font-medium" data-i18n="imageSettings"></summary>
+              <div class="collapse-content space-y-4">
+                <label id="jpeg-quality-wrap" class="form-control hidden w-full">
+                  <span class="field-label" data-i18n="jpegQuality"></span>
+                  <input class="range range-primary" type="range" name="jpeg_quality" min="40" max="100" value="88" />
+                </label>
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="form-control w-full">
+                    <span class="field-label"><span data-i18n="brightness"></span> <span id="brightness-value" class="font-normal text-slate-500">0</span></span>
+                    <input class="range range-primary" type="range" name="brightness" min="-50" max="50" value="0" />
+                  </label>
+                  <label class="form-control w-full">
+                    <span class="field-label"><span data-i18n="contrast"></span> <span id="contrast-value" class="font-normal text-slate-500">0</span></span>
+                    <input class="range range-primary" type="range" name="contrast" min="-50" max="50" value="0" />
+                  </label>
+                </div>
+                <label class="label cursor-pointer justify-start gap-3 rounded-xl bg-white px-3 py-2.5">
+                  <input class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="remove_background" />
+                  <span class="label-text text-sm" data-i18n="removeLightBackground"></span>
+                </label>
+                <label class="form-control w-full">
+                  <span class="field-label" data-i18n="filterStrength"></span>
+                  <input class="range range-primary" type="range" name="background_level" min="1" max="100" value="50" />
+                  <span class="field-help" data-i18n="mayLightenFaintStrokes"></span>
+                </label>
+              </div>
+            </details>
+
+            <p id="workflow-hint" class="text-sm text-slate-500" data-i18n="placeTheDocumentOnTheScannerGlass">
+              
+            </p>
+
+            <div class="grid gap-3 sm:grid-cols-[1fr_auto]">
+              <button id="scan-button" class="btn btn-primary rounded-xl normal-case" type="submit" data-i18n="scan">
+                
+              </button>
+              <button id="finish-scan-button" class="btn btn-outline hidden rounded-xl normal-case" type="button" data-i18n="createPdf">
+                
+              </button>
+            </div>
+            <div id="scan-result" aria-live="polite"></div>
+            <div id="scan-preview-wrap" class="hidden overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-2">
+              <img id="scan-preview" class="mx-auto max-h-80 rounded-lg object-contain" alt="" data-i18n-alt="scanPreviewAlt" />
+            </div>
+            <section id="continuous-pages-wrap" class="hidden space-y-3 rounded-xl border border-slate-200 p-3" aria-labelledby="continuous-page-count">
+              <div class="flex items-center justify-between gap-3">
+                <h2 class="text-sm font-medium text-slate-800" data-i18n="scannedPages"></h2>
+                <span id="continuous-page-count" class="badge badge-ghost text-xs" data-i18n="zeroPages"></span>
+              </div>
+              <div id="continuous-pages" class="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5" aria-label="" data-i18n-aria-label="scanPageThumbnailsLabel"></div>
+            </section>
+          </form>
+        </div>
+      </section>
+
+      <section id="print-panel" class="card hidden operation-panel" role="tabpanel" aria-labelledby="print-tab" tabindex="0">
+        <div class="card-body operation-panel-body">
+          <form id="print-form" class="space-y-4">
+            <label class="form-control w-full">
+              <span class="field-label" data-i18n="file"></span>
+              <input id="print-file" class="file-input file-input-bordered w-full bg-white" type="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff" required />
+              <span class="field-help" data-i18n="supportedFileTypes"></span>
+            </label>
+
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="paperSize"></span>
+                <select class="select select-bordered w-full bg-white" name="paper_size">
+                  <option value="A4" selected data-i18n="paperSizeA4"></option>
+                  <option value="A5" data-i18n="paperSizeA5"></option>
+                  <option value="A6" data-i18n="paperSizeA6"></option>
+                  <option value="Letter" data-i18n="letter"></option>
+                  <option value="Legal" data-i18n="legal"></option>
+                  <option value="Executive" data-i18n="executive"></option>
+                </select>
+              </label>
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="orientation"></span>
+                <select class="select select-bordered w-full bg-white" name="orientation">
+                  <option value="portrait" selected data-i18n="portrait"></option>
+                  <option value="landscape" data-i18n="landscape"></option>
+                </select>
+              </label>
+              <label class="form-control w-full">
+                <span class="field-label" data-i18n="copies"></span>
+                <input class="input input-bordered w-full bg-white" type="number" name="copies" min="1" max="99" value="1" />
+              </label>
+            </div>
+
+            <details class="collapse collapse-arrow rounded-xl border border-slate-200 bg-slate-50">
+              <summary class="collapse-title min-h-0 py-3 text-sm font-medium" data-i18n="moreOptions"></summary>
+              <div class="collapse-content space-y-4">
+                <label class="label cursor-pointer justify-start gap-3 rounded-xl bg-white px-3 py-2.5">
+                  <input id="print-preview-toggle" class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="print_preview" />
+                  <span class="label-text text-sm" data-i18n="preview"></span>
+                </label>
+                <div id="print-preview-wrap" class="hidden overflow-hidden rounded-xl border border-slate-200 bg-white p-2">
+                  <iframe id="print-pdf-preview" class="hidden h-72 w-full rounded-lg bg-white" title="" data-i18n-title="printPreviewTitle"></iframe>
+                  <img id="print-image-preview" class="hidden mx-auto max-h-72 rounded-lg object-contain" alt="" data-i18n-alt="printPreviewAlt" />
+                  <p id="print-preview-note" class="hidden p-4 text-sm text-slate-500"></p>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="paperType"></span>
+                    <select class="select select-bordered w-full bg-white" name="media_type">
+                      <option value="Plain" selected data-i18n="plain"></option>
+                      <option value="Thin" data-i18n="paperTypeThin"></option>
+                      <option value="Thick" data-i18n="paperTypeThick"></option>
+                      <option value="Thicker" data-i18n="thicker"></option>
+                      <option value="Bond" data-i18n="bond"></option>
+                      <option value="Recycled" data-i18n="recycled"></option>
+                    </select>
+                  </label>
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="resolution"></span>
+                    <select class="select select-bordered w-full bg-white" name="resolution">
+                      <option value="300" data-i18n="dpi300"></option>
+                      <option value="600" selected data-i18n="dpi600"></option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="optimizeFor"></span>
+                    <select class="select select-bordered w-full bg-white" name="print_quality">
+                      <option value="Graphics" selected data-i18n="graphics"></option>
+                      <option value="Text" data-i18n="text"></option>
+                    </select>
+                  </label>
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="pagesPerSheet"></span>
+                    <select class="select select-bordered w-full bg-white" name="pages_per_sheet">
+                      <option value="1" selected data-i18n="normalPageLayout"></option>
+                      <option value="2" data-i18n="twoInOne"></option>
+                      <option value="4" data-i18n="fourInOne"></option>
+                      <option value="6" data-i18n="sixInOne"></option>
+                      <option value="9" data-i18n="nineInOne"></option>
+                      <option value="16" data-i18n="sixteenInOne"></option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="pageOrder"></span>
+                    <select class="select select-bordered w-full bg-white" name="page_order">
+                      <option value="lrtb" data-i18n="leftToRightThenDown"></option>
+                      <option value="lrbt" data-i18n="leftToRightThenUp"></option>
+                      <option value="rltb" selected data-i18n="rightThenDown"></option>
+                      <option value="rlbt" data-i18n="rightToLeftThenUp"></option>
+                      <option value="tblr" data-i18n="downThenRight"></option>
+                      <option value="tbrl" data-i18n="downThenLeft"></option>
+                      <option value="btlr" data-i18n="upThenRight"></option>
+                      <option value="btrl" data-i18n="upThenLeft"></option>
+                    </select>
+                  </label>
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="border"></span>
+                    <select class="select select-bordered w-full bg-white" name="page_border">
+                      <option value="none" selected data-i18n="noLine"></option>
+                      <option value="single" data-i18n="borderThin"></option>
+                      <option value="single-thick" data-i18n="borderThick"></option>
+                      <option value="double" data-i18n="double"></option>
+                      <option value="double-thick" data-i18n="thickDouble"></option>
+                    </select>
+                  </label>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                  <label class="form-control w-full">
+                    <span class="field-label" data-i18n="scaling"></span>
+                    <select id="scale-mode" class="select select-bordered w-full bg-white" name="scale_mode">
+                      <option value="off" selected data-i18n="none"></option>
+                      <option value="fit" data-i18n="fitToPaper"></option>
+                      <option value="custom" data-i18n="custom"></option>
+                    </select>
+                  </label>
+                  <label id="scale-percent-wrap" class="form-control hidden w-full">
+                    <span class="field-label" data-i18n="scale"></span>
+                    <input class="input input-bordered w-full bg-white" type="number" name="scale_percent" min="25" max="400" value="100" />
+                  </label>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-3">
+                  <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                    <input class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="collate" />
+                    <span class="label-text text-sm" data-i18n="collate"></span>
+                  </label>
+                  <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                    <input class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="reverse_order" />
+                    <span class="label-text text-sm" data-i18n="reverseOrder"></span>
+                  </label>
+                  <label class="label cursor-pointer justify-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                    <input class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="toner_save" />
+                    <span class="label-text text-sm" data-i18n="tonerSave"></span>
+                  </label>
+                </div>
+
+                <details class="collapse collapse-arrow rounded-xl border border-slate-200 bg-white">
+                  <summary class="collapse-title min-h-0 py-3 text-sm font-medium" data-i18n="watermarkAndHeader"></summary>
+                  <div class="collapse-content space-y-3">
+                    <label class="label cursor-pointer justify-start gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+                      <input class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="watermark" />
+                      <span class="label-text text-sm" data-i18n="addWatermark"></span>
+                    </label>
+                    <label class="form-control w-full">
+                      <span class="field-label" data-i18n="watermarkText"></span>
+                    <input id="watermark-text" class="input input-bordered w-full bg-white" type="text" name="watermark_text" maxlength="48" value="" />
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+                      <input class="checkbox checkbox-primary checkbox-sm" type="checkbox" name="header_footer" />
+                      <span class="label-text text-sm" data-i18n="headerAndFooter"></span>
+                    </label>
+                  </div>
+                </details>
+              </div>
+            </details>
+
+            <details class="collapse collapse-arrow rounded-xl border border-slate-200 bg-slate-50">
+              <summary class="collapse-title min-h-0 py-3 text-sm font-medium" data-i18n="printProfile"></summary>
+              <div class="collapse-content space-y-3">
+                <label class="form-control w-full">
+                  <span class="field-label" data-i18n="selectProfile"></span>
+                  <select id="print-profile" class="select select-bordered w-full bg-white">
+                    <option value="default" selected data-i18n="default"></option>
+                    <option value="graphics" data-i18n="graphics600Dpi"></option>
+                    <option value="draft" data-i18n="draftTonerSave"></option>
+                  </select>
+                  <span class="field-help" data-i18n="customProfilesAreSavedInThisBrowser"></span>
+                </label>
+                <button id="save-profile-button" class="btn btn-outline btn-sm rounded-lg normal-case" type="button" data-i18n="saveCurrentProfile">
+                  
+                </button>
+              </div>
+            </details>
+
+            <button id="print-button" class="btn btn-primary w-full rounded-xl normal-case" type="submit" data-i18n="printDocument">
+              
+            </button>
+            <div id="print-result" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>

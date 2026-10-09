@@ -1,0 +1,10 @@
+services:
+  document-station:
+    build: .
+    restart: unless-stopped
+    environment:
+      PRINTER_IP: ${PRINTER_IP:-}
+      PRINTER_QUEUE: brother
+      PORT: "8080"
+    ports:
+      - "8080:8080"
