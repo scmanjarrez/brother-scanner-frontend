@@ -10,6 +10,7 @@ until lpstat -r >/dev/null 2>&1; do
     fi
     sleep 1
 done
+sleep 1
 
 if [ -n "${PRINTER_IP:-}" ]; then
     ppd_path=/usr/share/ppd/brother/brother-DCP1610W-cups-en.ppd
@@ -29,7 +30,9 @@ if [ -n "${PRINTER_IP:-}" ]; then
 fi
 
 rm -rf /tmp/brother-scanner
-install -d --owner=app --group=app --mode=0700 /tmp/brother-scanner
+mkdir -p /tmp/brother-scanner
+chown app:app /tmp/brother-scanner
+chmod 0700 /tmp/brother-scanner
 
 exec gosu app:app gunicorn \
     --bind "0.0.0.0:${PORT:-8080}" \
