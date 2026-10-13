@@ -81,6 +81,7 @@ for applet_path in "$rootfs"/bin/* "$rootfs"/usr/bin/*; do
     fi
 done
 
+# Ghostscript Resource/CMap links into the generated /var/lib tree.
 for source_path in \
     /app \
     /etc \
@@ -104,6 +105,7 @@ for source_path in \
     /usr/share/ppd \
     /usr/share/zoneinfo \
     /var/cache/cups \
+    /var/lib/ghostscript \
     /var/log/cups \
     /var/spool/cups; do
     copy_tree "$source_path"
@@ -214,3 +216,8 @@ for module_path in \
         copy_dynamic_dependencies "$module_path"
     fi
 done
+
+# Resolve CID CMaps inside the assembled root, following its symlinks.
+chroot "$rootfs" /usr/bin/gs -q -dNODISPLAY \
+    -c '/Identity-H /CMap findresource pop' \
+    -c '/Identity-V /CMap findresource pop quit'
