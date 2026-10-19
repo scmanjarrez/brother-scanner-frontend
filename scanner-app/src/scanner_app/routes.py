@@ -534,6 +534,12 @@ def _register_artifact_routes(app: Flask, settings: AppSettings) -> None:
         methods=["DELETE", "POST"],
     )
     app.add_url_rule(
+        "/api/scans/sessions/<session_id>/pages/<artifact_id>",
+        endpoint="delete_scan_page",
+        view_func=partial(_delete_scan_page, settings),
+        methods=["DELETE"],
+    )
+    app.add_url_rule(
         "/api/download/<session_id>/<artifact_id>",
         endpoint="download_scan_artifact",
         view_func=partial(_download_scan_artifact, settings),
@@ -564,6 +570,39 @@ def _close_scan_session(
         remove_scan_session(settings.temporary_dir, session_id)
     except ScanSessionError as err:
         return jsonify(error=err.to_payload()), 400
+    return Response(status=204)
+
+
+def _delete_scan_page(
+    settings: AppSettings,
+    session_id: str,
+    artifact_id: str,
+) -> tuple[Response, int] | Response:
+    """Delete one scanned PNG from its temporary session.
+
+    Args:
+        settings: Runtime paths and printer queue configuration.
+        session_id: Random identifier returned by the scan endpoint.
+        artifact_id: Identifier for the scanned page to delete.
+
+    Returns:
+        An empty response when the page has been removed.
+    """
+    try:
+        scan_session_dir = get_scan_session_directory(
+            settings.temporary_dir,
+            session_id,
+        )
+        page_path = _scan_page_path(scan_session_dir, artifact_id)
+        page_path.unlink()
+    except MessageError as err:
+        return jsonify(error=err.to_payload()), 404
+    except FileNotFoundError:
+        error = MessageError(MessageCode.SCAN_PAGE_UNAVAILABLE)
+        return jsonify(error=error.to_payload()), 404
+    except OSError:
+        error = MessageError(MessageCode.SCAN_PAGE_DELETE_FAILED)
+        return jsonify(error=error.to_payload()), 500
     return Response(status=204)
 
 

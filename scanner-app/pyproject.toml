@@ -1,6 +1,6 @@
 [project]
 name = "scanner-app"
-version = "0.1.0"
+version = "0.1.1"
 description = "Flask web application for Brother printing and scanning"
 readme = "README.md"
 requires-python = ">=3.12"

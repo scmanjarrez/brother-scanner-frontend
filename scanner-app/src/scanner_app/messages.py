@@ -50,6 +50,7 @@ class MessageCode(StrEnum):
     SCAN_SESSION_INVALID = "theScanSessionIsInvalid"
     SCAN_SESSION_EXPIRED = "theScanSessionExpiredStartANewSession"
     SCAN_PAGE_UNAVAILABLE = "oneOfThePagesIsNoLongerAvailable"
+    SCAN_PAGE_DELETE_FAILED = "couldNotDeleteTheScannedPage"
     SCAN_ARTIFACT_NOT_FOUND = "theRequestedFileDoesNotExist"
     PREVIEW_NOT_FOUND = "thePreviewDoesNotExist"
     FILE_HAS_NO_PRINTABLE_PAGES = "theFileContainsNoPrintablePages"

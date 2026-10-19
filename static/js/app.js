@@ -147,6 +147,7 @@ let cardSide = "front";
 let scanSessionId = null;
 let printPreviewUrl = null;
 let selectedContinuousArtifactId = null;
+let continuousPageMutationInProgress = false;
 
 function localizeStaticCopy() {
   document.querySelectorAll("[data-i18n]").forEach((element) => {
@@ -632,17 +633,21 @@ function resetScanAfterDownload() {
 function renderContinuousPages() {
   const countKey = continuousArtifactIds.length === 1 ? "pageCountOne" : "pageCountMany";
   continuousPageCount.textContent = t(countKey, { count: continuousArtifactIds.length });
-  continuousPagesWrap.classList.remove("hidden");
+  continuousPagesWrap.classList.toggle("hidden", continuousArtifactIds.length === 0);
   continuousPages.replaceChildren();
 
   continuousArtifactIds.forEach((artifactId, index) => {
     const pageNumber = index + 1;
     const isSelected = artifactId === selectedContinuousArtifactId;
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `relative rounded-lg border p-1 text-left transition ${isSelected ? "border-blue-600 ring-2 ring-blue-100" : "border-slate-200 hover:border-slate-400"}`;
-    button.setAttribute("aria-label", t("viewPage", { number: pageNumber }));
-    button.setAttribute("aria-pressed", String(isSelected));
+    const card = document.createElement("article");
+    card.className = `overflow-hidden rounded-lg border bg-white transition ${isSelected ? "border-emerald-700 ring-2 ring-emerald-100" : "border-slate-200"}`;
+
+    const previewButton = document.createElement("button");
+    previewButton.type = "button";
+    previewButton.className = "block w-full p-1 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700";
+    previewButton.dataset.pagePreview = artifactId;
+    previewButton.setAttribute("aria-label", t("viewPage", { number: pageNumber }));
+    previewButton.setAttribute("aria-pressed", String(isSelected));
 
     const image = document.createElement("img");
     image.src = `/api/preview/${scanSessionId}/${artifactId}`;
@@ -651,17 +656,191 @@ function renderContinuousPages() {
     image.className = "aspect-[3/4] w-full rounded-md bg-slate-50 object-contain";
 
     const label = document.createElement("span");
-    label.className = "block px-1 py-1 text-xs font-medium text-slate-700";
+    label.className = "block px-1 py-2 text-xs font-medium text-slate-700";
     label.textContent = t("pageLabel", { number: pageNumber });
 
-    button.append(image, label);
-    button.addEventListener("click", () => {
+    previewButton.append(image, label);
+    previewButton.addEventListener("click", () => {
       selectedContinuousArtifactId = artifactId;
       displayPreview(image.src);
       renderContinuousPages();
+      focusContinuousPagePreview(artifactId);
     });
-    continuousPages.append(button);
+
+    const controls = document.createElement("div");
+    controls.className = [
+      "grid grid-cols-[minmax(0,17fr)_minmax(24px,3fr)] items-center gap-1",
+      "border-t border-slate-100 px-1 py-0.5",
+    ].join(" ");
+    controls.setAttribute("role", "group");
+    controls.setAttribute("aria-label", t("pageActions", { number: pageNumber }));
+
+    const moveLeftButton = createPageActionButton(
+      "movePageLeft",
+      pageNumber,
+      "M19 12H5m7 7-7-7 7-7",
+    );
+    moveLeftButton.disabled = index === 0 || continuousPageMutationInProgress;
+    moveLeftButton.addEventListener("click", () => {
+      moveContinuousPage(artifactId, -1);
+      focusContinuousPagePreview(artifactId);
+    });
+
+    const moveRightButton = createPageActionButton(
+      "movePageRight",
+      pageNumber,
+      "M5 12h14m-7-7 7 7-7 7",
+    );
+    moveRightButton.disabled = index === continuousArtifactIds.length - 1
+      || continuousPageMutationInProgress;
+    moveRightButton.addEventListener("click", () => {
+      moveContinuousPage(artifactId, 1);
+      focusContinuousPagePreview(artifactId);
+    });
+
+    const moveControls = document.createElement("div");
+    moveControls.className = "page-movement-controls";
+    moveControls.append(moveLeftButton, moveRightButton);
+
+    const deleteButton = createPageActionButton(
+      "deletePage",
+      pageNumber,
+      "M4 7h16M10 11v6m4-6v6M9 7V4h6v3m3 0-.8 13H6.8L6 7",
+    );
+    deleteButton.className = "page-action-button page-action-button-delete";
+    deleteButton.disabled = continuousPageMutationInProgress;
+    deleteButton.addEventListener("click", () => {
+      void deleteContinuousPage(artifactId);
+    });
+
+    controls.append(moveControls, deleteButton);
+    card.append(previewButton, controls);
+    continuousPages.append(card);
   });
+}
+
+function createPageActionButton(key, pageNumber, iconPath) {
+  const label = t(key, { number: pageNumber });
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "page-action-button";
+  button.setAttribute("aria-label", label);
+  button.title = label;
+
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("fill", "none");
+  icon.setAttribute("stroke", "currentColor");
+  icon.setAttribute("stroke-width", "1.7");
+  icon.setAttribute("stroke-linecap", "round");
+  icon.setAttribute("stroke-linejoin", "round");
+  icon.setAttribute("width", "14");
+  icon.setAttribute("height", "14");
+  icon.setAttribute("aria-hidden", "true");
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", iconPath);
+  icon.append(path);
+  button.append(icon);
+  return button;
+}
+
+function moveContinuousPage(artifactId, offset) {
+  if (continuousPageMutationInProgress) {
+    return;
+  }
+
+  const currentIndex = continuousArtifactIds.indexOf(artifactId);
+  const targetIndex = currentIndex + offset;
+  if (currentIndex < 0 || targetIndex < 0 || targetIndex >= continuousArtifactIds.length) {
+    return;
+  }
+
+  [continuousArtifactIds[currentIndex], continuousArtifactIds[targetIndex]] = [
+    continuousArtifactIds[targetIndex],
+    continuousArtifactIds[currentIndex],
+  ];
+  renderContinuousPages();
+}
+
+function focusContinuousPagePreview(artifactId) {
+  continuousPages
+    .querySelector(`[data-page-preview="${artifactId}"]`)
+    ?.focus();
+}
+
+async function deleteContinuousPage(artifactId) {
+  if (!scanSessionId || continuousPageMutationInProgress) {
+    return;
+  }
+
+  if (!continuousArtifactIds.includes(artifactId)) {
+    return;
+  }
+
+  const sessionId = scanSessionId;
+  let pageRemoved = false;
+  let nextFocusArtifactId = null;
+  continuousPageMutationInProgress = true;
+  finishScanButton.disabled = true;
+  renderContinuousPages();
+  try {
+    const response = await fetch(
+      `/api/scans/sessions/${sessionId}/pages/${artifactId}`,
+      { method: "DELETE" },
+    );
+    if (scanSessionId !== sessionId || workflowSelect.value !== "continuous") {
+      return;
+    }
+    if (!response.ok) {
+      await readJson(response);
+    }
+
+    if (
+      scanSessionId !== sessionId
+      || workflowSelect.value !== "continuous"
+      || !continuousArtifactIds.includes(artifactId)
+    ) {
+      return;
+    }
+
+    const pageIndex = continuousArtifactIds.indexOf(artifactId);
+    continuousArtifactIds.splice(pageIndex, 1);
+    pageRemoved = true;
+    nextFocusArtifactId = continuousArtifactIds[
+      Math.min(pageIndex, continuousArtifactIds.length - 1)
+    ] ?? null;
+    if (selectedContinuousArtifactId === artifactId) {
+      selectedContinuousArtifactId = continuousArtifactIds[
+        Math.min(pageIndex, continuousArtifactIds.length - 1)
+      ] ?? null;
+      if (selectedContinuousArtifactId) {
+        displayPreview(
+          `/api/preview/${scanSessionId}/${selectedContinuousArtifactId}`,
+        );
+      } else {
+        scanPreviewWrap.classList.add("hidden");
+      }
+    }
+    if (continuousArtifactIds.length === 0) {
+      finishScanButton.classList.add("hidden");
+    }
+  } catch (error) {
+    const message = messageForError(error);
+    showMessage(scanResult, message.code, message.params, "error");
+  } finally {
+    continuousPageMutationInProgress = false;
+    finishScanButton.disabled = false;
+    renderContinuousPages();
+    if (pageRemoved) {
+      if (nextFocusArtifactId) {
+        focusContinuousPagePreview(nextFocusArtifactId);
+      } else {
+        scanButton.focus();
+      }
+    }
+    refreshWorkflowCopy();
+  }
 }
 
 function updatePrintPreview() {
